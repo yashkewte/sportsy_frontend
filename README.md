@@ -1,6 +1,9 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
+🏅 Sportsy
+“Find Players. Join Games. Play More.”
+
+Sportsy is a modern web platform that helps users find, join, and organize local sports events. Built using Next.js and Firebase, it offers a fast, responsive, and secure experience for both casual players and sports organizers.
 
 First, run the development server:
 
@@ -14,23 +17,60 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+🚀 Tech Stack
+Frontend: Next.js 14 (App Router), Tailwind CSS, Lucide Icons
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+Backend: Firebase (Authentication, Firestore, Storage)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+State Management:Context API
 
-## Learn More
+UI/UX: Responsive Design, Dark Mode, Toast Notifications (Sonner)
 
-To learn more about Next.js, take a look at the following resources:
+🔐 Core Features
+Feature	Description
+✅ User Authentication	Login, Register, Forgot Password, Email Verification
+🔒 Protected Routes	Only logged-in users can access dashboards
+🧑‍💼 Admin Routes	Role-based access (admin/user)
+📅 Event Management (CRUD)	Create, edit, delete, join events
+🔍 Event Filtering	Filter by city, sport, date
+📄 User Dashboard	View profile and joined events
+🛠️ Admin Panel	Manage users and assign roles
+🔔 Toast Notifications	For feedback on user actions
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+🧭 Folder Structure (App Router)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+/app
+  ├─ (auth)/login
+  ├─ (auth)/register
+  ├─ (auth)/forgot-password
+  ├─ (user)/dashboard
+  ├─ (admin)/admin/dashboard
+  ├─ about/
+  ├─ contact/
+  ├─ events/
+  └─ layout.js
 
-## Deploy on Vercel
+/context
+/components
+/store
+/firebase
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+🧪 Setup Instructions
+
+# 1. Clone the repo
+git clone https://github.com/yashkewte/sportsy_frontend.git
+cd sportsy
+
+# 2. Install dependencies
+npm install
+
+# 3. Setup Firebase
+# - Create a project on Firebase Console
+# - Enable Authentication (Email/Password)
+# - Setup Firestore DB
+# - Add your credentials in /firebase/firebaseConfig.js
+
+# 4. Run the app
+npm run dev
