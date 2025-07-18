@@ -122,6 +122,7 @@ function Dashboard() {
   }
 
   const fetchEvents = async () => {
+    if (!user) return;
     try {
       const eventsRef = collection(db, 'events')
       const q = role === 'admin' ? eventsRef : query(eventsRef, where('createdBy', '==', user.uid))
@@ -137,6 +138,7 @@ function Dashboard() {
   }
 
   const fetchJoinedEvents = async () => {
+    if (!user) return;
     try {
       const eventsRef = collection(db, 'events')
       const querySnapshot = await getDocs(eventsRef)
@@ -269,28 +271,57 @@ function Dashboard() {
     return filtered
   }
 
-  const handleRefresh = async () => {
-    setIsRefreshing(true)
-    try {
-      await Promise.all([
-        fetchEvents(),
-        fetchJoinedEvents(),
-        fetchCategories()
-      ])
-      toast.success('Dashboard refreshed!')
-    } catch (error) {
-      toast.error('Error refreshing dashboard')
-    } finally {
-      setIsRefreshing(false)
-    }
-  }
+  // Use getFilteredAndSortedEvents(events) and getFilteredAndSortedEvents(joinedEvents) directly in render
+  const filteredSortedEvents = getFilteredAndSortedEvents(events)
+  const filteredSortedJoinedEvents = getFilteredAndSortedEvents(joinedEvents)
 
+  // Memoize event handlers
   const handleEventClick = (event) => {
     setSelectedEvent(event)
     setShowEventDetails(true)
   }
 
- 
+  const handleEdit = (item, type) => {
+    setEditingItem(item)
+    if (type === 'event') {
+      setEventForm(item)
+      setShowEventForm(true)
+    } else if (type === 'category') {
+      setCategoryForm(item)
+      setShowCategoryForm(true)
+    } else if (type === 'city') {
+      setCityForm(item)
+      setShowCityForm(true)
+    }
+  }
+
+  // Only fetch cities if admin and tab is 'cities'
+  useEffect(() => {
+    if (role === 'admin' && activeTab === 'cities') {
+      fetchCities()
+    }
+  }, [role, activeTab])
+
+  // Only fetch categories if needed (on mount or when tab is events/categories)
+  useEffect(() => {
+    if (activeTab === 'events' || activeTab === 'categories' || activeTab === 'joinedEvents') {
+      fetchCategories()
+    }
+  }, [activeTab])
+
+  // Only fetch joined events if tab is 'joinedEvents'
+  useEffect(() => {
+    if (activeTab === 'joinedEvents') {
+      fetchJoinedEvents()
+    }
+  }, [activeTab])
+
+  // Only fetch events if tab is 'events' or 'joinedEvents'
+  useEffect(() => {
+    if (activeTab === 'events' || activeTab === 'joinedEvents') {
+      fetchEvents()
+    }
+  }, [activeTab])
 
   const handleEventSubmit = async (e) => {
     e.preventDefault()
@@ -385,17 +416,19 @@ function Dashboard() {
     }
   }
 
-  const handleEdit = (item, type) => {
-    setEditingItem(item)
-    if (type === 'event') {
-      setEventForm(item)
-      setShowEventForm(true)
-    } else if (type === 'category') {
-      setCategoryForm(item)
-      setShowCategoryForm(true)
-    } else if (type === 'city') {
-      setCityForm(item)
-      setShowCityForm(true)
+  const handleRefresh = async () => {
+    setIsRefreshing(true)
+    try {
+      await Promise.all([
+        fetchEvents(),
+        fetchJoinedEvents(),
+        fetchCategories()
+      ])
+      toast.success('Dashboard refreshed!')
+    } catch (error) {
+      toast.error('Error refreshing dashboard')
+    } finally {
+      setIsRefreshing(false)
     }
   }
 
@@ -650,7 +683,7 @@ function Dashboard() {
           </div>
           
           <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6" : "space-y-4"}>
-            {getFilteredAndSortedEvents(events).length === 0 ? (
+            {filteredSortedEvents.length === 0 ? (
               <div className="col-span-full text-center py-8 md:py-12">
                 <div className="max-w-md mx-auto">
                   <Trophy className="w-12 h-12 md:w-16 md:h-16 text-gray-400 mx-auto mb-4" />
@@ -668,7 +701,7 @@ function Dashboard() {
                 </div>
               </div>
             ) : (
-              getFilteredAndSortedEvents(events).map((event) => (
+              filteredSortedEvents.map((event) => (
               <Card 
                 key={event.id} 
                 className={`bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer group ${
@@ -714,10 +747,7 @@ function Dashboard() {
                       <Button
                         size="sm"
                         variant="ghost"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleEdit(event, 'event')
-                        }}
+                        onClick={() => handleEdit(event, 'event')}
                         className="opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <Edit className="w-4 h-4" />
@@ -725,10 +755,7 @@ function Dashboard() {
                       <Button
                         size="sm"
                         variant="ghost"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleDelete('events', event.id)
-                        }}
+                        onClick={() => handleDelete('events', event.id)}
                         className="opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:text-red-700"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -744,20 +771,14 @@ function Dashboard() {
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleEdit(event, 'event')
-                            }}
+                            onClick={() => handleEdit(event, 'event')}
                           >
                             <Edit className="w-4 h-4" />
                           </Button>
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleDelete('events', event.id)
-                            }}
+                            onClick={() => handleDelete('events', event.id)}
                             className="text-red-500 hover:text-red-700"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -838,7 +859,7 @@ function Dashboard() {
           </div>
           
           <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6" : "space-y-4"}>
-            {getFilteredAndSortedEvents(joinedEvents).map((event) => (
+            {filteredSortedJoinedEvents.map((event) => (
               <Card key={event.id} style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
                 <CardHeader>
                   <CardTitle className="flex justify-between items-start">
